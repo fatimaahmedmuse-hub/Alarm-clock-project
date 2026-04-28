@@ -1,0 +1,36 @@
+Project Documentation: Java swing Alarm Clock
+
+# Overview:
+
+An advanced Java Swing desktop application that provides a real-time digital clock and date display with integrated alarm management and theme customization.
+
+
+# Core Features:
+
+. Dual-Line Display: Separated date and time labels for a modern, clean look.
+
+. Theme Engine: Toggle between Light Mode and Dark Mode for better accessibility.
+
+. Intelligent Alarm System:
+
+   . Input Validation: Prevents empty entries and enforces HH:mm (24-hour) formatting using regex.
+   . Snooze Functionality: One-click option to postpone an alarm by 5 minutes.
+   . Clear Function: Allows users to reset or cancel active alarms instantly.
+. Real-time Updates: A high-precision timer refreshes the UI every second.
+
+# Technical Specifications:
+
+ . Language: Java (JDK 8+)
+ . Layout Managers: FlowLayout (Primary) and BoxLayout (Internal stacking).
+ . Validation Logic: Regex-based string matching (([0-9]|2[0-3]):[0-5][0-9]).
+ . Time API: Utilizes java.time.LocalTime and java.time.LocalDate for accuracy.
+
+# User Guide:
+
+1. Setting an Alarm: Type your desired time in the text box (e.g., 08:00 or 22:30).
+
+2. Validation: If you enter an invalid format or leave the field blank, an error popup will guide you.
+
+3. Handling Alerts: When the alarm triggers, choose Dismiss to turn it off or Snooze to be reminded in 5 minutes.
+
+4. Customization: Use the Toggle Dark Mode button to switch the visual theme at any time.
