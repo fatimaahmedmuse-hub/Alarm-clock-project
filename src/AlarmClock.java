@@ -18,14 +18,14 @@ public class AlarmClock extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
 
-        // Create a Panel specifically for the Date and Time to stack them vertically
+        
         JPanel displayPanel = new JPanel();
         displayPanel.setLayout(new BoxLayout(displayPanel, BoxLayout.Y_AXIS));
-        displayPanel.setOpaque(false); // Let the frame background show through
+        displayPanel.setOpaque(false); 
 
         dateLabel = new JLabel("Loading Date...");
         dateLabel.setFont(new Font("Arial", Font.PLAIN, 18));
-        dateLabel.setAlignmentX(Component.CENTER_ALIGNMENT); // Center within panel
+        dateLabel.setAlignmentX(Component.CENTER_ALIGNMENT); 
         
         currentTimeLabel = new JLabel("Loading Time...");
         currentTimeLabel.setFont(new Font("Arial", Font.BOLD, 36));
