@@ -1,76 +1,95 @@
 import javax.swing.*;
 import java.awt.*;
-//import java.awt.event.ActionEvent;
-//import java.awt.event.ActionListener;
-import java.time.LocalTime;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 public class AlarmClock extends JFrame {
-    private JLabel dateLabel;
-    private JLabel currentTimeLabel;
+    private JLabel dateLabel, currentTimeLabel;
     private JTextField alarmTimeField;
-    private JButton setAlarmButton, clearAlarmButton;
+    private JButton setAlarmButton, clearAlarmButton, themeButton;
     private String alarmTime = "";
     private boolean isAlarmSet = false;
+    private boolean isDarkMode = false;
 
     public AlarmClock() {
-        setTitle("Java Swing Alarm Clock");
-        setSize(350, 250);
+        setTitle("Alarm Clock Pro");
+        setSize(350, 350);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new FlowLayout());
+        setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
 
-        dateLabel = new JLabel("Loading date...");
+        // Create a Panel specifically for the Date and Time to stack them vertically
+        JPanel displayPanel = new JPanel();
+        displayPanel.setLayout(new BoxLayout(displayPanel, BoxLayout.Y_AXIS));
+        displayPanel.setOpaque(false); // Let the frame background show through
+
+        dateLabel = new JLabel("Loading Date...");
         dateLabel.setFont(new Font("Arial", Font.PLAIN, 18));
-        add(dateLabel);
-
+        dateLabel.setAlignmentX(Component.CENTER_ALIGNMENT); // Center within panel
+        
         currentTimeLabel = new JLabel("Loading Time...");
-        currentTimeLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        add(currentTimeLabel);
+        currentTimeLabel.setFont(new Font("Arial", Font.BOLD, 36));
+        currentTimeLabel.setAlignmentX(Component.CENTER_ALIGNMENT); // Center within panel
 
-        add(new JLabel("Set Alarm (HH:mm):"));
+        displayPanel.add(dateLabel);
+        displayPanel.add(Box.createVerticalStrut(10)); // Add a small gap between lines
+        displayPanel.add(currentTimeLabel);
+
+        // UI Components
         alarmTimeField = new JTextField(5);
-        add(alarmTimeField);
-
         setAlarmButton = new JButton("Set Alarm");
-        add(setAlarmButton);
-
         clearAlarmButton = new JButton("Clear");
-        add(clearAlarmButton);
+        themeButton = new JButton("Toggle Dark Mode");
 
-        // Set Alarm Logic
+        // Add components to Frame
+        add(displayPanel); 
+        add(new JLabel("Set Alarm (HH:mm):"));
+        add(alarmTimeField);
+        add(setAlarmButton);
+        add(clearAlarmButton);
+        add(themeButton);
+
+        themeButton.addActionListener(e -> toggleTheme());
         setAlarmButton.addActionListener(e -> {
             alarmTime = alarmTimeField.getText();
             isAlarmSet = true;
             JOptionPane.showMessageDialog(this, "Alarm set for " + alarmTime);
         });
 
-        // Clear Alarm Logic
         clearAlarmButton.addActionListener(e -> {
             isAlarmSet = false;
             alarmTime = "";
             alarmTimeField.setText("");
-            JOptionPane.showMessageDialog(this, "Alarm Cleared");
         });
 
-        // Timer to update clock and check alarm
-        Timer timer = new Timer(1000, e -> updateTime());
+        Timer timer = new Timer(1000, e -> updateDisplay());
         timer.start();
 
+        applyTheme();
         setVisible(true);
     }
 
-    private void updateTime() {
-        LocalDate today = LocalDate.now();
-        String displayDate = today.format(DateTimeFormatter.ofPattern("EEEE, MMMM dd, yyyy"));
-        dateLabel.setText(displayDate);
+    private void toggleTheme() {
+        isDarkMode = !isDarkMode;
+        applyTheme();
+    }
+
+    private void applyTheme() {
+        Color bgColor = isDarkMode ? new Color(45, 45, 45) : Color.WHITE;
+        Color textColor = isDarkMode ? Color.WHITE : Color.BLACK;
+
+        getContentPane().setBackground(bgColor);
+        dateLabel.setForeground(textColor);
+        currentTimeLabel.setForeground(textColor);
+        themeButton.setText(isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode");
+    }
+
+    private void updateDisplay() {
+        dateLabel.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("EEEE, MMM dd, yyyy")));
         LocalTime now = LocalTime.now();
-        String displayTime = now.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-        currentTimeLabel.setText(displayTime);
+        currentTimeLabel.setText(now.format(DateTimeFormatter.ofPattern("HH:mm:ss")));
 
-        String compareTime = now.format(DateTimeFormatter.ofPattern("HH:mm"));
-
-        if (isAlarmSet && compareTime.equals(alarmTime)) {
+        if (isAlarmSet && now.format(DateTimeFormatter.ofPattern("HH:mm")).equals(alarmTime)) {
             isAlarmSet = false;
             triggerAlarm();
         }
@@ -78,18 +97,12 @@ public class AlarmClock extends JFrame {
 
     private void triggerAlarm() {
         String[] options = {"Dismiss", "Snooze (5 mins)"};
-        int choice = JOptionPane.showOptionDialog(this, 
-                "ALARM! It is now " + alarmTime, 
-                "Alarm Triggered", 
-                JOptionPane.DEFAULT_OPTION, 
-                JOptionPane.WARNING_MESSAGE, 
-                null, options, options[0]);
+        int choice = JOptionPane.showOptionDialog(this, "ALARM!", "Wake Up", 
+                JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options);
 
-        if (choice == 1) { // User clicked Snooze
-            LocalTime snoozeTime = LocalTime.now().plusMinutes(5);
-            alarmTime = snoozeTime.format(DateTimeFormatter.ofPattern("HH:mm"));
+        if (choice == 1) {
+            alarmTime = LocalTime.now().plusMinutes(5).format(DateTimeFormatter.ofPattern("HH:mm"));
             isAlarmSet = true;
-            JOptionPane.showMessageDialog(this, "Snoozed until " + alarmTime);
         }
     }
 
