@@ -1,81 +1,99 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+//import java.awt.event.ActionEvent;
+//import java.awt.event.ActionListener;
 import java.time.LocalTime;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class AlarmClock extends JFrame {
-    
+    private JLabel dateLabel;
     private JLabel currentTimeLabel;
     private JTextField alarmTimeField;
-    private JButton setAlarmButton;
+    private JButton setAlarmButton, clearAlarmButton;
     private String alarmTime = "";
     private boolean isAlarmSet = false;
 
     public AlarmClock() {
-        // Setup the Frame
         setTitle("Java Swing Alarm Clock");
-        setSize(300, 200);
+        setSize(350, 250);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new FlowLayout());
 
-        // 1. Current Time Label
-        currentTimeLabel = new JLabel("Loading...");
+        dateLabel = new JLabel("Loading date...");
+        dateLabel.setFont(new Font("Arial", Font.PLAIN, 18));
+        add(dateLabel);
+
+        currentTimeLabel = new JLabel("Loading Time...");
         currentTimeLabel.setFont(new Font("Arial", Font.BOLD, 24));
         add(currentTimeLabel);
 
-        // 2. Alarm Input Field (HH:mm)
         add(new JLabel("Set Alarm (HH:mm):"));
         alarmTimeField = new JTextField(5);
         add(alarmTimeField);
 
-        // 3. Set Alarm Button
         setAlarmButton = new JButton("Set Alarm");
         add(setAlarmButton);
 
-        // Button Logic
-        setAlarmButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                alarmTime = alarmTimeField.getText();
-                isAlarmSet = true;
-                JOptionPane.showMessageDialog(null, "Alarm set for " + alarmTime);
-            }
+        clearAlarmButton = new JButton("Clear");
+        add(clearAlarmButton);
+
+        // Set Alarm Logic
+        setAlarmButton.addActionListener(e -> {
+            alarmTime = alarmTimeField.getText();
+            isAlarmSet = true;
+            JOptionPane.showMessageDialog(this, "Alarm set for " + alarmTime);
         });
 
-        // 4. Timer to update every second
-        Timer timer = new Timer(1000, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updateTime();
-            }
+        // Clear Alarm Logic
+        clearAlarmButton.addActionListener(e -> {
+            isAlarmSet = false;
+            alarmTime = "";
+            alarmTimeField.setText("");
+            JOptionPane.showMessageDialog(this, "Alarm Cleared");
         });
+
+        // Timer to update clock and check alarm
+        Timer timer = new Timer(1000, e -> updateTime());
         timer.start();
 
         setVisible(true);
     }
 
     private void updateTime() {
-        // Get current time
+        LocalDate today = LocalDate.now();
+        String displayDate = today.format(DateTimeFormatter.ofPattern("EEEE, MMMM dd, yyyy"));
+        dateLabel.setText(displayDate);
         LocalTime now = LocalTime.now();
-        
-        // Format for display (with seconds)
         String displayTime = now.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
         currentTimeLabel.setText(displayTime);
 
-        // Format for comparison (matching user input HH:mm)
         String compareTime = now.format(DateTimeFormatter.ofPattern("HH:mm"));
 
-        // Check if alarm matches
         if (isAlarmSet && compareTime.equals(alarmTime)) {
-            isAlarmSet = false; // Reset alarm so it doesn't fire every second for that minute
-            JOptionPane.showMessageDialog(this, "ALARM! It is now " + alarmTime);
+            isAlarmSet = false;
+            triggerAlarm();
+        }
+    }
+
+    private void triggerAlarm() {
+        String[] options = {"Dismiss", "Snooze (5 mins)"};
+        int choice = JOptionPane.showOptionDialog(this, 
+                "ALARM! It is now " + alarmTime, 
+                "Alarm Triggered", 
+                JOptionPane.DEFAULT_OPTION, 
+                JOptionPane.WARNING_MESSAGE, 
+                null, options, options[0]);
+
+        if (choice == 1) { // User clicked Snooze
+            LocalTime snoozeTime = LocalTime.now().plusMinutes(5);
+            alarmTime = snoozeTime.format(DateTimeFormatter.ofPattern("HH:mm"));
+            isAlarmSet = true;
+            JOptionPane.showMessageDialog(this, "Snoozed until " + alarmTime);
         }
     }
 
     public static void main(String[] args) {
-        // Run GUI on the Event Dispatch Thread
-        SwingUtilities.invokeLater(() -> new AlarmClock());
+        SwingUtilities.invokeLater(AlarmClock::new);
     }
 }
